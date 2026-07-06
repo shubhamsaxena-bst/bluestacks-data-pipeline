@@ -1,0 +1,4 @@
+{"source_name": "ad_campaign_performance", "file_format": "json", "is_active": 1}
+{"source_name": "web_analytics_events", "file_format": "json", "is_active": 1}
+{"source_name": "crm_leads_opportunities", "file_format": "json", "is_active": 1}
+{"source_name": "email_campaign_engagement", "file_format": "csv", "is_active": 1}

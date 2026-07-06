@@ -1,0 +1,59 @@
+{
+  "name": "PL_Ingest_ParamSource",
+  "properties": {
+    "description": "Generic parameterized ingestion pipeline reused for every raw marketing data source: Copy raw -> ADLS landing, then invoke the Bronze and Silver Databricks notebooks for that source.",
+    "parameters": {
+      "sourceName": { "type": "string" },
+      "fileFormat": { "type": "string", "defaultValue": "json" },
+      "ingestDate": { "type": "string" }
+    },
+    "activities": [
+      {
+        "name": "CopyRawToLanding",
+        "type": "Copy",
+        "typeProperties": {
+          "source": { "type": "JsonSource", "storeSettings": { "type": "AzureBlobFSReadSettings", "recursive": true } },
+          "sink": { "type": "JsonSink", "storeSettings": { "type": "AzureBlobFSWriteSettings" } }
+        },
+        "inputs": [{
+          "referenceName": "DS_Generic_Landing_Blob",
+          "type": "DatasetReference",
+          "parameters": { "sourceName": "@pipeline().parameters.sourceName", "ingestDate": "@pipeline().parameters.ingestDate" }
+        }],
+        "outputs": [{
+          "referenceName": "DS_Generic_Landing_Blob",
+          "type": "DatasetReference",
+          "parameters": { "sourceName": "@pipeline().parameters.sourceName", "ingestDate": "@pipeline().parameters.ingestDate" }
+        }]
+      },
+      {
+        "name": "Notebook_Bronze",
+        "type": "DatabricksNotebook",
+        "dependsOn": [{ "activity": "CopyRawToLanding", "dependencyConditions": ["Succeeded"] }],
+        "typeProperties": {
+          "notebookPath": "/Repos/bluestacks-data-pipeline/notebooks/01_bronze_ingest_marketing_data",
+          "baseParameters": {
+            "source_name": "@pipeline().parameters.sourceName",
+            "ingest_date": "@pipeline().parameters.ingestDate"
+          }
+        },
+        "linkedServiceName": { "referenceName": "LS_BSI_Databricks", "type": "LinkedServiceReference" },
+        "policy": { "timeout": "0.01:00:00", "retry": 2, "retryIntervalInSeconds": 60 }
+      },
+      {
+        "name": "Notebook_Silver",
+        "type": "DatabricksNotebook",
+        "dependsOn": [{ "activity": "Notebook_Bronze", "dependencyConditions": ["Succeeded"] }],
+        "typeProperties": {
+          "notebookPath": "/Repos/bluestacks-data-pipeline/notebooks/02_silver_cleanse_enrich",
+          "baseParameters": {
+            "source_name": "@pipeline().parameters.sourceName",
+            "ingest_date": "@pipeline().parameters.ingestDate"
+          }
+        },
+        "linkedServiceName": { "referenceName": "LS_BSI_Databricks", "type": "LinkedServiceReference" },
+        "policy": { "timeout": "0.01:00:00", "retry": 1, "retryIntervalInSeconds": 60 }
+      }
+    ]
+  }
+}

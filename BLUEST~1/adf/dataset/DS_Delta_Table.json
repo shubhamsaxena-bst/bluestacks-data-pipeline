@@ -1,0 +1,15 @@
+{
+  "name": "DS_BSI_DeltaTable",
+  "properties": {
+    "linkedServiceName": { "referenceName": "LS_BSI_Databricks", "type": "LinkedServiceReference" },
+    "parameters": {
+      "databaseName": { "type": "string" },
+      "tableName": { "type": "string" }
+    },
+    "type": "DeltaTable",
+    "typeProperties": {
+      "database": { "value": "@dataset().databaseName", "type": "Expression" },
+      "table": { "value": "@dataset().tableName", "type": "Expression" }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "LS_BSI_ADLSGen2",
+  "properties": {
+    "type": "AzureBlobFS",
+    "typeProperties": {
+      "url": "https://bsimktadls.dfs.core.windows.net",
+      "accountKey": {
+        "type": "AzureKeyVaultSecret",
+        "store": { "referenceName": "LS_BSI_KeyVault", "type": "LinkedServiceReference" },
+        "secretName": "adls-storage-key"
+      }
+    },
+    "connectVia": { "referenceName": "IR-AutoResolve", "type": "IntegrationRuntimeReference" }
+  }
+}
