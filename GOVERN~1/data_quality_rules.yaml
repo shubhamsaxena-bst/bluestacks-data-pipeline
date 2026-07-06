@@ -1,0 +1,56 @@
+# Data quality rule catalog - enforced in notebooks/utils/data_quality_checks.py and
+# monitored via bsi_governance.pipeline_run_metrics. Codifies "data quality, consistency and
+# governance across legacy and cloud-based pipelines" from the JD.
+
+rules:
+  ad_campaign_performance:
+    - rule: not_null
+      columns: [campaign_id, channel, report_date]
+      action: quarantine
+    - rule: uniqueness
+      columns: [campaign_id, channel, report_date]
+      action: dedupe_keep_latest
+    - rule: range_check
+      column: spend_usd
+      min: 0
+      max: 1000000
+      action: flag
+
+  web_analytics_events:
+    - rule: not_null
+      columns: [event_id, visitor_id, event_ts]
+      action: quarantine
+    - rule: uniqueness
+      columns: [event_id]
+      action: dedupe_keep_latest
+    - rule: freshness
+      column: event_ts
+      max_lag_hours: 3
+      action: alert
+
+  crm_leads_opportunities:
+    - rule: not_null
+      columns: [lead_id, stage, stage_change_ts]
+      action: quarantine
+    - rule: allowed_values
+      column: stage
+      values: [new, mql, sql, opportunity, closed_won, closed_lost]
+      action: flag
+    - rule: referential_integrity
+      column: campaign_id
+      reference_table: bsi_silver.dim_campaign
+      action: flag
+
+  email_campaign_engagement:
+    - rule: not_null
+      columns: [engagement_id, email_campaign_id, event_ts]
+      action: quarantine
+    - rule: allowed_values
+      column: event_type
+      values: [send, open, click, unsubscribe, bounce]
+      action: flag
+
+alerting:
+  quarantine_ratio_threshold_pct: 2
+  channel: azure_monitor_action_group
+  action_group: "ag-bsi-data-eng-oncall"
