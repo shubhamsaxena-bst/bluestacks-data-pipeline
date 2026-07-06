@@ -1,9 +1,0 @@
-{
-  "name": "DS_BSI_Oracle_CRM_LeadOpportunity",
-  "properties": {
-    "linkedServiceName": { "referenceName": "LS_BSI_OnPremOracle_CRM", "type": "LinkedServiceReference" },
-    "type": "OracleTable",
-    "typeProperties": { "schema": "CRM", "table": "LEAD_OPPORTUNITY" },
-    "description": "Read side of legacy Informatica PowerCenter coexistence - ADF lands a copy in ADLS for the Delta Lake pipeline while PowerCenter continues to serve existing downstream consumers during migration."
-  }
-}

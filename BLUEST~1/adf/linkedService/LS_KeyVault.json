@@ -1,9 +1,0 @@
-{
-  "name": "LS_BSI_KeyVault",
-  "properties": {
-    "type": "AzureKeyVault",
-    "typeProperties": {
-      "baseUrl": "https://bsi-prod-kv.vault.azure.net/"
-    }
-  }
-}
